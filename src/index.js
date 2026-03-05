@@ -1,4 +1,5 @@
-// Export público de la librería map-core
-// Este archivo permite importar el componente Map desde la raíz de la librería
+// Exportación del componente Map como biblioteca
+export { default as Map } from './components/Map/Map';
 
-export { default } from './components/Map/Map.jsx';
+// Exportación del estilo JSON
+export { default as mapStyle } from './components/Map/Style.json';

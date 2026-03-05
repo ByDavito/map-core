@@ -4,4 +4,78 @@
 .map-container {
   width: 100%;
   height: 100%;
+  min-height: 400px;
+  min-width: 400px;
+}
+
+/* Estilo para el contenedor del ref */
+.map-container > div {
+  width: 100%;
+  height: 100%;
+}
+
+/* Contenedor de marcadores */
+.map-markers-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+/* Punto del mapa (MapPoint) */
+.map-point {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 20;
+  max-width: 200px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* Imagen del tooltip */
+.tooltip img {
+  width: 100%;
+  height: auto;
+  max-height: 100px;
+  object-fit: cover;
+  border-radius: 2px;
+  margin-bottom: 4px;
+}
+
+/* Título del tooltip */
+.tooltip h4 {
+  margin: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Descripción del tooltip */
+.tooltip p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
 }
