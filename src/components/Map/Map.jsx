@@ -26,6 +26,7 @@ const Map = ({
   tooltipComponent,
   tooltipContent,
   tooltipStyles,
+  onMapReady,
 }) => {
   console.log("Map props:", { points: points.length, markerContent, MarkerComponent: typeof MarkerComponent });
   const mapContainer = useRef(null);
@@ -115,6 +116,11 @@ const Map = ({
 
       map.current.on('load', () => {
         setIsLoaded(true);
+        
+        // Notificar que el mapa está listo
+        if (typeof onMapReady === 'function') {
+          onMapReady(map.current);
+        }
         
         // Aplicar restricciones según el modo (dentro de load)
         const config = restrictions[mode] || restrictions.preview;
