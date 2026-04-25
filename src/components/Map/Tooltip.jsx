@@ -17,7 +17,7 @@ const Tooltip = ({ point, tooltipComponent, tooltipContent, tooltipStyles, onMou
     return (
       <div 
         className="tooltip" 
-        style={{ position: 'absolute', zIndex: 1000, ...tooltipStyles }}
+        style={{ position: 'absolute', zIndex: 9999, ...tooltipStyles }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
@@ -31,7 +31,7 @@ const Tooltip = ({ point, tooltipComponent, tooltipContent, tooltipStyles, onMou
     return (
       <div 
         className="tooltip" 
-        style={{ position: 'absolute', zIndex: 1000, ...tooltipStyles }}
+        style={{ position: 'absolute', zIndex: 9999, ...tooltipStyles }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         dangerouslySetInnerHTML={{ __html: tooltipContent }} 
@@ -43,7 +43,7 @@ const Tooltip = ({ point, tooltipComponent, tooltipContent, tooltipStyles, onMou
   return (
     <div 
       className="tooltip" 
-      style={{ position: 'absolute', zIndex: 1000, ...tooltipStyles }}
+      style={{ position: 'absolute', zIndex: 9999, ...tooltipStyles }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >

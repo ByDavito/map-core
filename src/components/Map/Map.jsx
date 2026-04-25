@@ -26,6 +26,7 @@ const Map = ({
   tooltipComponent,
   tooltipContent,
   tooltipStyles,
+  tooltipOnClick = false, // Nuevo parámetro para controlar si el tooltip se muestra en click
   onMapReady,
 }) => {
   console.log("Map props:", { points: points.length, markerContent, MarkerComponent: typeof MarkerComponent });
@@ -33,6 +34,7 @@ const Map = ({
   const map = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTooltipId, setActiveTooltipId] = useState(null); // Estado para rastrear tooltip activo
 
   // Callback seguro para onPointClick
   const handlePointClick = useCallback((point) => {
@@ -43,10 +45,14 @@ const Map = ({
 
   // Callback seguro para onMapClick
   const handleMapClick = useCallback((e) => {
+    // Cerrar tooltip activo al hacer click en el mapa
+    if (tooltipOnClick && activeTooltipId !== null) {
+      setActiveTooltipId(null);
+    }
     if (mode !== "edit" || typeof onMapClick !== 'function') return;
     const { lng, lat } = e.lngLat;
     onMapClick({ lng, lat });
-  }, [mode, onMapClick]);
+  }, [mode, onMapClick, tooltipOnClick, activeTooltipId]);
 
   // Configuración de restricciones según modo
   const restrictions = {
@@ -236,6 +242,9 @@ const Map = ({
             tooltipContent={tooltipContent}
             tooltipStyles={tooltipStyles}
             tooltipContainer={tooltipsContainer}
+            tooltipOnClick={tooltipOnClick}
+            activeTooltipId={activeTooltipId}
+            onTooltipOpen={setActiveTooltipId}
           >
             {/* Marker Component (React) - prioridad alta */}
             {MarkerComponent ? (
@@ -311,7 +320,7 @@ const Map = ({
         injectedStyles.forEach(link => link.remove());
       }
     };
-  }, [points, isLoaded, handlePointClick, markerContent, MarkerComponent, markerStyles]);
+  }, [points, isLoaded, handlePointClick, markerContent, MarkerComponent, markerStyles, activeTooltipId]);
 
   // Evento de zoom end - solo para modo edit
   useEffect(() => {

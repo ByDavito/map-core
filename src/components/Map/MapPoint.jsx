@@ -12,73 +12,86 @@ import Tooltip from './Tooltip';
  * @param {Object} tooltipStyles - Estilos personalizados para el tooltip
  * @param {HTMLElement} tooltipContainer - Contenedor separado para el tooltip
  */
-const MapPoint = ({ point, onPointClick, children, tooltipComponent, tooltipContent, tooltipStyles, tooltipContainer }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
+const MapPoint = ({ point, onPointClick, children, tooltipComponent, tooltipContent, tooltipStyles, tooltipContainer, tooltipOnClick = false, activeTooltipId, onTooltipOpen }) => {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showTooltipHover, setShowTooltipHover] = useState(false);
 
-  const handleClick = () => {
-    onPointClick(point);
+  // Determinar si mostrar tooltip basado en tooltipOnClick y activeTooltipId
+  const showTooltip = tooltipOnClick 
+    ? activeTooltipId === point.id 
+    : showTooltipHover; // En modo hover, usar estado interno
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    // Si tooltipOnClick es true, toggle tooltip al hacer click
+    if (tooltipOnClick) {
+      if (activeTooltipId === point.id) {
+        // Si ya está abierto, cerrar
+        if (onTooltipOpen) {
+          onTooltipOpen(null);
+        }
+      } else {
+        // Si no está abierto, abrir y notificar al padre
+        if (onTooltipOpen) {
+          onTooltipOpen(point.id);
+        }
+        // Calcular posición del marker para posicionar el tooltip
+        const markerEl = e.currentTarget;
+        const rect = markerEl.getBoundingClientRect();
+        const mapContainer = markerEl.closest('.map-container');
+        if (mapContainer) {
+          const mapRect = mapContainer.getBoundingClientRect();
+          setTooltipPosition({
+            x: rect.left - mapRect.left + rect.width / 2,
+            y: rect.top - mapRect.top
+          });
+        }
+      }
+    }
+    // Ejecutar callback original si existe
+    if (onPointClick) {
+      onPointClick(point);
+    }
   };
 
   const handleMouseEnter = (e) => {
-    setShowTooltip(true);
-    // Calcular posición del marker para posicionar el tooltip
-    const markerEl = e.currentTarget;
-    const rect = markerEl.getBoundingClientRect();
-    const mapContainer = markerEl.closest('.map-container');
-    if (mapContainer) {
-      const mapRect = mapContainer.getBoundingClientRect();
-      setTooltipPosition({
-        x: rect.left - mapRect.left + rect.width / 2,
-        y: rect.top - mapRect.top
-      });
+    // Solo mostrar tooltip en hover si tooltipOnClick es false
+    if (!tooltipOnClick) {
+      setShowTooltipHover(true);
+      // Calcular posición del marker para posicionar el tooltip
+      const markerEl = e.currentTarget;
+      const rect = markerEl.getBoundingClientRect();
+      const mapContainer = markerEl.closest('.map-container');
+      if (mapContainer) {
+        const mapRect = mapContainer.getBoundingClientRect();
+        setTooltipPosition({
+          x: rect.left - mapRect.left + rect.width / 2,
+          y: rect.top - mapRect.top
+        });
+      }
     }
   };
 
-  const handleMouseLeave = () => setShowTooltip(false);
+  const handleMouseLeave = () => {
+    // Solo ocultar tooltip en hover si tooltipOnClick es false
+    if (!tooltipOnClick) {
+      setShowTooltipHover(false);
+    }
+  };
 
-  // Renderizar tooltip en portal si hay un contenedor separado
+  // Función para cerrar el tooltip (llamada desde el padre)
+  const closeTooltip = () => {
+    if (onTooltipOpen) {
+      onTooltipOpen(null);
+    }
+  };
+
+  // Renderizar tooltip inline como hijo del marker para que se mueva con el mapa
   const renderTooltip = () => {
     if (!showTooltip) return null;
     
-    const tooltipElement = (
-      <Tooltip 
-        point={point}
-        tooltipComponent={tooltipComponent}
-        tooltipContent={tooltipContent}
-        tooltipStyles={{
-          ...tooltipStyles,
-          left: `${tooltipPosition.x}px`,
-          top: `${tooltipPosition.y}px`
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      />
-    );
-
-    if (tooltipContainer) {
-      return ReactDOM.createPortal(tooltipElement, tooltipContainer);
-    }
-    return tooltipElement;
-  };
-
-  return (
-    <div
-      className="map-point"
-      style={{
-        position: "absolute" ,
-          left: "0" ,
-          top: "0" ,
-          transform: 'translate(-50%, -100%)',
-          pointerEvents: 'auto'
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-    >
-      {children}
-      {/* Tooltip renderizado inline si no hay contenedor separado */}
-      {!tooltipContainer && showTooltip && (
+    return (
+      <div onClick={(e) => e.stopPropagation()}>
         <Tooltip 
           point={point}
           tooltipComponent={tooltipComponent}
@@ -87,9 +100,31 @@ const MapPoint = ({ point, onPointClick, children, tooltipComponent, tooltipCont
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         />
-      )}
-      {/* Tooltip renderizado en portal si hay contenedor separado */}
-      {tooltipContainer && renderTooltip()}
+      </div>
+    );
+  };
+
+  // El marker activo (con tooltip mostrado) debe tener z-index alto para estar por encima de otros markers
+  const markerStyle = {
+    position: "absolute",
+    left: "0",
+    top: "0",
+    transform: 'translate(-50%, -100%)',
+    pointerEvents: 'auto',
+    zIndex: showTooltip ? 99999 : 1
+  };
+
+  return (
+    <div
+      className="map-point"
+      style={markerStyle}
+      onMouseEnter={!tooltipOnClick ? handleMouseEnter : undefined}
+      onMouseLeave={!tooltipOnClick ? handleMouseLeave : undefined}
+      onClick={handleClick}
+    >
+      {children}
+      {/* Tooltip renderizado inline en el contenedor del marker */}
+      {renderTooltip()}
     </div>
   );
 };

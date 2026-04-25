@@ -1,6 +1,6 @@
 {
   "name": "@bydavito/map-core",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "type": "module",
   "main": "dist/map-core.umd.js",
   "module": "dist/map-core.es.js",
